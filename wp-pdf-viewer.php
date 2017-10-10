@@ -1,17 +1,17 @@
 <?php
 /**
- * Plugin Name:       Embed PDF Viewer
- * Plugin URI:        https://github.com/afragen/embed-pdf-viewer
+ * Plugin Name:       WP PDF oEmbed
+ * Plugin URI:        https://github.com/udx/wp-pdf-oembed
  * Description:       Embed a PDF from the Media Library or elsewhere via oEmbed into an `object` tag or Google Doc Viewer as fallback.
- * Author:            Andy Fragen
- * Author URI:        https://github.com/afragen
- * Version:           1.5.0
+ * Author:            UsabilityDynamics, inc.
+ * Author URI:        https://github.com/udx
+ * Version:           1.0.0
  * License:           GPLv2+
  * Domain Path:       /languages
- * Text Domain:       embed-pdf-viewer
+ * Text Domain:       wp-pdf-oembed
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
- * GitHub Plugin URI: https://github.com/afragen/embed-pdf-viewer
- * GitHub Branch:     develop
+ * GitHub Plugin URI: https://github.com/udx/wp-pdf-oembed
+ * GitHub Branch:     latest
  * Requires PHP:      5.3
  * Requires WP:       4.0
  */
@@ -112,21 +112,9 @@ class Embed_PDF_Viewer {
 			return $atts;
 		}
 
-		$default = array(
-			'height' => 500,
-			'width'  => 800,
+		$atts = array(
 			'title'  => $post->post_title,
 		);
-
-		/*
-		 * Ensure $atts isn't the href.
-		 */
-		$atts = is_array( $atts ) ? $atts : array();
-
-		if ( isset( $atts['height'] ) ) {
-			$atts['height'] = ( $atts['height'] / 2 );
-		}
-		$atts = array_merge( $default, $atts );
 
 		/*
 		 * Create title from filename.
@@ -135,9 +123,9 @@ class Embed_PDF_Viewer {
 			$atts['title'] = ucwords( preg_replace( '/(-|_)/', ' ', $post->post_name ) );
 		}
 
-		$iframe_fallback = '<iframe class="embed-pdf-viewer" src="https://docs.google.com/viewer?url=' . urlencode( $post->guid );
+		$iframe_fallback = '<iframe class="wp-pdf-oembed" src="https://docs.google.com/viewer?url=' . urlencode( $post->guid );
 		$iframe_fallback .= '&amp;embedded=true" frameborder="0" ';
-		$iframe_fallback .= 'style="height:' . $atts['height'] . 'px;width:' . $atts['width'] . 'px;" ';
+		$iframe_fallback .= 'style="height:600px;width:100%" ';
 		$iframe_fallback .= 'title="' . $atts['title'] . '"></iframe>' . "\n";
 
 		/*
@@ -146,24 +134,23 @@ class Embed_PDF_Viewer {
 		 */
 		$style = '<style>
 		@media only screen and (max-device-width: 1024px) {
-			object.embed-pdf-viewer { display:none; }			
+			object.wp-pdf-oembed { display:none; }
 		}
 		@media only screen and (min-device-width : 1024px) {
-			iframe.embed-pdf-viewer { display:none; }
-			object iframe.embed-pdf-viewer { display:block; }
+			iframe.wp-pdf-oembed { display:none; }
+			object iframe.wp-pdf-oembed { display:block; }
 		}
 		</style>';
 
-		$object = '<object class="embed-pdf-viewer" data="' . $post->guid;
+		$object = '<object class="wp-pdf-oembed" data="' . $post->guid;
 		$object .= '#scrollbar=1&toolbar=1"';
 		$object .= 'type="application/pdf" ';
-		$object .= 'height=' . $atts['height'] . ' width=' . $atts['width'] . ' > ';
+		$object .= 'height=600 width=100% > ';
 		$object .= $iframe_fallback;
 		$object .= '</object>';
 
 		$embed = $object;
 		$embed .= $style . $iframe_fallback;
-		$embed .= '<a href="' . $post->guid . '">' . $atts['title'] . '</a>';
 
 		return $embed;
 	}
